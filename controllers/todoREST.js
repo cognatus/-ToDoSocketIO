@@ -1,12 +1,12 @@
 var List = require('../moduls/List');
 
-exports.getList = function(req, res) {
+exports.getList = function(req, res, next) {
 
 	List.find(function(err, doc) {
 
 		if(err){ 
 
-			res.send(500, err.message);
+			next(err);
 
 		}else{
 
@@ -18,7 +18,7 @@ exports.getList = function(req, res) {
 
 };
 
-exports.addElement = function(req, res) {
+exports.addElement = function(req, res, next) {
 
 	var list = new List({
 		done:	 false,
@@ -28,11 +28,9 @@ exports.addElement = function(req, res) {
 	list.save(function(err, doc) {
 		if(err){ 
 
-			res.send(500, err.message);
+			next(err);
 
 		}else{
-
-			console.log('doc',doc)
 
 			res.status(200).jsonp(doc);
 
@@ -41,13 +39,13 @@ exports.addElement = function(req, res) {
 
 };
 
-exports.removeElement = function(req, res) {
+exports.removeElement = function(req, res, next) {
 
 	List.remove({ _id: req.body.id}, function(err, doc) {
 
 		if(err){ 
 
-			res.send(500, err.message);
+			next(err);
 
 		}else{
 
@@ -59,13 +57,13 @@ exports.removeElement = function(req, res) {
 
 }
 
-exports.checkElement = function(req, res) {
+exports.checkElement = function(req, res, next) {
 
 	List.findById( req.body.id, function (err, list) {
 		
 		if(err){ 
 
-			res.send(500, err.message);
+			next(err);
 
 		}else{
 
@@ -74,10 +72,9 @@ exports.checkElement = function(req, res) {
 			list.save(function(err, doc) {
 				if(err){ 
 
-					res.send(500, err.message);
+					next(err);
 
 				}else{
-					console.log(req.body.done)
 
 					res.status(200).jsonp(doc);
 
@@ -91,74 +88,27 @@ exports.checkElement = function(req, res) {
 
 }
 
-exports.moveElement = function(req, res) {
+exports.moveElement = function(req, res, next) {
 
-	List.find( function (err, list) {
-		
-		if(err){ 
+	var movement = req.body.movement;
+	var lugar = req.body.lugar;
 
-			res.send(500, err.message);
-
-		}else{
-
-			var movement = req.body.movement;
-			var lugar = req.body.lugar;
-
-			//forgot to improve, in process to do that
-
-			List.update({lugar: lugar}, {$set: {lugar: null}},function(err, doc) {
-
-				if(err){ 
-
-					res.send(500, err.message);
-
-				}else{
-
-					List.update({lugar: lugar+movement}, {$set: {lugar: lugar}},function(err, doc) {
-
-						if(err){ 
-
-							res.send(500, err.message);
-
-						}else{
-
-							List.update({lugar: null}, {$set: {lugar: lugar+movement}},function(err, doc) {
-
-								if(err){ 
-
-									res.send(500, err.message);
-
-								}else{
-
-									res.status(200).jsonp(doc);
-
-								}
-							})
-
-						}
-					})
-
-				}
-			})
-
-
-			/*uppdateLugar(lugar, null)
-			.then(function (data) {
-				// handle data
-				return uppdateLugar(lugar+movement, lugar)
-			})
-			.then(function (csv) {
-				uppdateLugar(null, lugar+movement)
-			})
-			.catch(next);*/
-		}
-
-		
-	});
+	List.find()
+	.then(function(data) {
+		return uppdateLugar(lugar, null);	
+	})
+	.then(function (data) {
+		return uppdateLugar(lugar+movement, lugar);
+	})
+	.then(function (data) {
+		uppdateLugar(null, lugar+movement);
+		res.status(200).jsonp(data);
+	})
+	.catch(next);
 
 }
 
-function uppdateLugar(lugar, movimiento) {
+var uppdateLugar = function(lugar, movimiento) {
 	List.update({lugar: lugar}, {$set: {lugar: movimiento}},function(err, doc) {
 
 		if(err){ 
