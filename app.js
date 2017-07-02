@@ -5,10 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-
 var app = express();
+
+var mongoose = require('mongoose');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,8 +21,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+var connection = mongoose.connect('mongodb://localhost/todo', function(error){
+
+  if(error){
+
+    throw error; 
+
+  }else{
+
+    console.log('Estas super bato crazy party mirrey loco conectado a MongoDB');
+
+  }
+});
+
+var autoIncrement = require('mongoose-auto-increment');
+
+autoIncrement.initialize(connection);
+
+
+var index = require('./routes/index');
+var todo = require('./routes/todoRoutes');
+
 app.use('/', index);
-app.use('/users', users);
+app.use('/todo', todo);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,5 +1,28 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+	.container( ng-controller="toDoCtrl", ng-init="init()" )
+		h2 To Do List
+		.row
+			.col-md-4
+				input.form-control.input-sm( type="text", ng-model="newTask" )
+			.col-md-2
+				button( type="button", class="btn btn-primary glyphicon glyphicon-edit", ng-click="add()" )
+		br
+		table.table.table-hover.row( style="width:48%" )
+			thead
+				tr
+					th.col-md-1
+					th.col-md-5 Task
+					th.col-md-1 Move
+					th.col-md-1 Remove
+			tbody
+				tr( ng-repeat="task in list | ordenamela" )
+					td 
+						input( type="checkbox", ng-checked="task.done", ng-click="checar($index,task)")
+					td {{task.task}}
+					td 
+						button( type="button", class="btn btn-primary btn-xs glyphicon glyphicon-arrow-up", ng-click="move($index,task.lugar,-1)" )
+						button( type="button", class="btn btn-primary btn-xs glyphicon glyphicon-arrow-down", ng-click="move($index,task.lugar,1)" )
+					td 
+						button( type="button", class="btn btn-primary btn-xs glyphicon glyphicon-trash", ng-click="remove($index)" )
