@@ -104,6 +104,8 @@ exports.moveElement = function(req, res) {
 			var movement = req.body.movement;
 			var lugar = req.body.lugar;
 
+			//forgot to improve, in process to do that
+
 			List.update({lugar: lugar}, {$set: {lugar: null}},function(err, doc) {
 
 				if(err){ 
